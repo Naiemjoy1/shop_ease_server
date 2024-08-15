@@ -28,8 +28,19 @@ async function run() {
 
     //products api
     app.get("/products", async (req, res) => {
-      const result = await productCollection.find().toArray();
-      res.send(result);
+      const page = parseInt(req.query.page) || 0;
+      const size = parseInt(req.query.size) || 10;
+      const totalProducts = await productCollection.countDocuments();
+      const products = await productCollection
+        .find()
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+
+      res.send({
+        totalProducts,
+        products,
+      });
     });
 
     // Send a ping to confirm a successful connection
