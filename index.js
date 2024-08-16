@@ -124,6 +124,7 @@ async function run() {
       res.send(result);
     });
 
+    // delete product by id
     app.delete("/products/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -131,6 +132,7 @@ async function run() {
       res.send(result);
     });
 
+    // patch product by id
     app.patch("/products/:id", async (req, res) => {
       const item = req.body;
       const id = req.params.id;
