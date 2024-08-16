@@ -96,11 +96,11 @@ async function run() {
       });
     });
 
+    // get product by id
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
 
       try {
-        // Ensure the ID is a valid ObjectId
         if (!ObjectId.isValid(id)) {
           return res.status(400).send({ message: "Invalid product ID" });
         }
