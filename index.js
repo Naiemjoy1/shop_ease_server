@@ -42,9 +42,50 @@ async function run() {
     app.get("/products", async (req, res) => {
       const page = parseInt(req.query.page) || 0;
       const size = parseInt(req.query.size) || 10;
-      const totalProducts = await productCollection.countDocuments();
+      const search = req.query.search || "";
+      const sort = req.query.sort || "default";
+      const brand = req.query.brand || "all";
+      const category = req.query.category || "all";
+      const priceRange = req.query.priceRange || "all";
+
+      const query = {};
+
+      if (search) {
+        query.name = { $regex: search, $options: "i" }; // Case-insensitive search
+      }
+
+      if (brand !== "all") {
+        query.brand = brand;
+      }
+
+      if (category !== "all") {
+        query.category = category;
+      }
+
+      if (priceRange !== "all") {
+        if (priceRange === "low") {
+          query.price = { $lte: 50 };
+        } else if (priceRange === "mid") {
+          query.price = { $gt: 50, $lte: 100 };
+        } else if (priceRange === "high") {
+          query.price = { $gt: 100 };
+        }
+      }
+
+      const totalProducts = await productCollection.countDocuments(query);
+
+      const sortOptions = {};
+      if (sort === "price-low-high") {
+        sortOptions.price = 1;
+      } else if (sort === "price-high-low") {
+        sortOptions.price = -1;
+      } else if (sort === "date-newest") {
+        sortOptions.createdAt = -1;
+      }
+
       const products = await productCollection
-        .find()
+        .find(query)
+        .sort(sortOptions)
         .skip(page * size)
         .limit(size)
         .toArray();
