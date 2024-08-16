@@ -37,6 +37,7 @@ async function run() {
     // Connect the client to the server
     // await client.connect();
     const productCollection = client.db("ShopEaseDB").collection("products");
+    const emailCollection = client.db("ShopEaseDB").collection("email");
 
     // Products API
     app.get("/products", async (req, res) => {
@@ -149,6 +150,22 @@ async function run() {
       };
       const result = await productCollection.updateOne(filter, updateDoc);
       res.send(result);
+    });
+
+    // email api
+    app.post("/email", async (req, res) => {
+      const { name, email, message } = req.body;
+
+      if (!name || !email || !message) {
+        return res.status(400).send({ message: "All fields are required" });
+      }
+      try {
+        const newContact = { name, email, message, date: new Date() };
+        const result = await emailCollection.insertOne(newContact);
+        res.status(200).send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error saving contact data", error });
+      }
     });
 
     // Send a ping to confirm a successful connection
